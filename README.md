@@ -1,192 +1,50 @@
+This is a PowerShell wrapper for the ConnectWise Control API.
+https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_Manager_API_Reference
+
+
 ```
 irm 'https://bit.ly/controlposh' | iex
 ```
 
-[Get-CWCLastContact](#get-cwclastcontact)
-    
-[Invoke-CWCCommand](#invoke-cwccommand)
-    
-# Get-CWCLastContact
-## SYNOPSIS
-Returns the date the machine last connected to the server.
-## SYNTAX
-```powershell
-Get-CWCLastContact [-Server] <Object> [-GUID] <Object> [-User] <Object> [-Password] <Object> [<CommonParameters>]
+example:
 ```
-## DESCRIPTION
+# Your Control server URL
+$Server = 'https://control.domain.com'
 
-## PARAMETERS
+# Get Control credentials
+$Credentials = Get-Credential
 
-### -Server &lt;Object&gt;
-The address to your Control server. Example 'https://control.labtechconsulting.com' or 'http://control.secure.me:8040'
-```
-Required?                    true
-Position?                    1
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -GUID &lt;Object&gt;
-The GUID identifier for the machine you wish to connect to.
-No documentation on how to find the GUID but it is in the URL and service.
-```
-Required?                    true
-Position?                    2
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -User &lt;Object&gt;
-User to authenticate against the Control server.
-```
-Required?                    true
-Position?                    3
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -Password &lt;Object&gt;
-Password to authenticate against the Control server.
-```
-Required?                    true
-Position?                    4
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
-### -Quiet &lt;Object&gt;
-Will output a boolean result, $True for Connected or $False for Offline.
-```
-Required?                    false
-Position?                    5
-Default value                false
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
+# Load module into memory
+irm 'https://bit.ly/controlposh' | iex
 
-### -Seconds &lt;Object&gt;
-Used with Quiet switch. The number of seconds a machine needs to be offline before returning $False.
-```
-Required?                    false
-Position?                    6
-Default value                
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
-## INPUTS
+# Splat
+$CWCInfo = @{
+    Server = $Server
+    Credentials = $Credentials
+}
 
-## OUTPUTS
-[datetime]
-## NOTES
-```
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  1/20/2016
-Purpose/Change: Initial script development
-```
-## EXAMPLES
+# Find this machine in Control
+$Computer = Get-CWCSessions @CWCInfo -Type Access -Search $env:COMPUTERNAME -Limit 1
 
-### EXAMPLE 1
-```powershell
-Get-CWCLastContact -Server $Server -GUID $GUID -User $User -Password $Password
-```
-Will return the last contact of the machine with that GUID.
+if(!$Computer) {return "Computer not found"}
 
-# Invoke-CWCCommand
-## SYNOPSIS
-Will issue a command against a given machine and return the results.
-## SYNTAX
-```powershell
-Invoke-CWCCommand [-Server] <Object> [-GUID] <Object> [-User] <Object> [-Password] <Object> [[-Command] <Object>] [[-TimeOut] <Object>] [<CommonParameters>]
+# Get the machines last contact
+Get-CWCLastContact @CWCInfo -GUID $Computer.SessionID
 ```
-## DESCRIPTION
+         
+         
+# Functions
 
-## PARAMETERS
+[Get-CWCLastContact](CWCPoSh/Get-CWCLastContact.md)
 
-### -Server &lt;Object&gt;
-The address to your Control server. Example 'https://control.labtechconsulting.com' or 'http://control.secure.me:8040'
-```
-Required?                    true
-Position?                    1
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -GUID &lt;Object&gt;
-The GUID identifier for the machine you wish to connect to.
-No documentation on how to find the GUID but it is in the URL and service.
-```
-Required?                    true
-Position?                    2
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -User &lt;Object&gt;
-User to authenticate against the Control server.
-```
-Required?                    true
-Position?                    3
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -Password &lt;Object&gt;
-Password to authenticate against the Control server.
-```
-Required?                    true
-Position?                    4
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -Command &lt;Object&gt;
-The command you wish to issue to the machine.
-```
-Required?                    false
-Position?                    5
-Default value
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
- 
-### -TimeOut &lt;Object&gt;
-The amount of time in milliseconds that a command can execute before it is killed.
-```
-Required?                    false
-Position?                    6
-Default value                10000
-Accept pipeline input?       false
-Accept wildcard characters?  false
-```
-## INPUTS
+[Get-CWCSessions](CWCPoSh/Get-CWCSessions.md)
 
-## OUTPUTS
-The output of the Command provided.
-## NOTES
-```
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  1/20/2016
-Purpose/Change: Initial script development
-```
-## EXAMPLES
+[Invoke-CWCCommand](CWCPoSh/Invoke-CWCCommand.md)
 
-### EXAMPLE 1
-```powershell
-Invoke-CWCCommand -Server $Server -GUID $GUID -User $User -Password $Password -Command 'hostname'
-```
-Will return the hostname of the machine.
- 
-### EXAMPLE 2
-```powershell
-Invoke-CWCCommand -Server $Server -GUID $GUID -User $User -Password $Password -TimeOut 120000 -Command 'powershell "iwr https://bit.ly/ltposh | iex; Restart-LTService"'
-```
-Will restart the Automate agent on the target machine.
+[Invoke-CWCWake](CWCPoSh/Invoke-CWCWake.md)
+
+[Remove-CWCSession](CWCPoSh/Remove-CWCSession.md)
+
+[Update-CWCSessionName](CWCPoSh/Update-CWCSessionName.md)
+
+
